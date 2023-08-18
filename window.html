@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shoprocket App</title>
+  <link rel="stylesheet" href="assets/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="assets/styles.css">
+</head>
+<body>
+
+    <header>
+        <div class="row justify-content-between">
+        
+            <div class="col-8" id="store">
+                <img class="store-logo" src="">
+                <h4 class="store-name m-0">
+                    <span class="name h4"></span>
+                    <span class="plan"></span>
+                </h4>
+            </div>
+
+            <div class="nav col-4 justify-content-end">
+                <div id="home-button" title="Home">
+                    <img src="assets/home-alt.svg">
+                </div>
+
+                <div id="orders-button" title="Orders">
+                    <img src="assets/inbox-in.svg">
+                </div>
+
+                <div id="settings-button" title="Settings">
+                    <img src="assets/cog.svg">
+                </div>
+
+                <div id="exit-button" title="Quit">
+                    <img src="assets/power-off.svg">
+                </div>
+            </div>
+
+        </div>
+
+    </header>
+
+    <main>
+
+        <!-- Home -->
+        <section class="p-4" id="home-section">
+            <!-- Good afteroon Ryan -->
+
+            <div class="stats row">
+                
+                <div class="stat col-6 pb-4">
+                    <h3>Total Revenue</h3>
+                    <h2 id="todays-orders">
+                        $0.00
+                    </h2>
+                </div>
+
+                <div class="stat col-6 pb-4 border-left">
+                    <h3>Total Orders</h3>
+                    <h2 id="todays-orders">
+                        0
+                    </h2>
+                </div>
+
+                <div class="stat col-6 pb-4">
+                    <h3>Total Visitors</h3>
+                    <h2 id="todays-orders">
+                        0
+                    </h2>
+                </div>
+
+                <div class="stat col-6 pb-4 border-left">
+                    <h3>Abandoned</h3>
+                    <h2 id="todays-orders">
+                        $0.00
+                    </h2>
+                </div>
+
+            </div>
+
+
+            <div id="linechart" style="width: 100%; height: 300px;"></div>
+
+
+
+        </section>
+    
+        <!-- Orders -->
+        <section class="p-4" id="orders-section" style="display: none;">
+            <div id="order-list" class="orders-container"></div>
+        </section>
+
+
+        <!-- Settings -->
+<section class="p-4" id="settings-section" style="display: none;">
+    <h3>Settings</h3>
+    <form id="settings-form">
+        <div class="form-group row">
+            <label for="api-key" class="col-sm-2 col-form-label">Enter API Secret Key:</label>
+            <div class="col-sm-8">
+                <input type="text" id="api-key" name="api-key" class="form-control" required>
+                <p class="mt-2">You can find your "Secret Key" here: <a href="https://shoprocket.io/dashboard/settings/api-keys">https://shoprocket.io/dashboard/settings/api-keys</a></p>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-offset-2 col-sm-8">
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </form>
+
+    <div id="save-message" class="alert alert-success" style="display:none;">
+        Settings Saved Successfully!
+    </div>
+
+    
+</section>
+
+    
+    </main>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="window.js"></script>
+    
+</body>
+</html>
+

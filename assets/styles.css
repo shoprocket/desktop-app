@@ -1,0 +1,204 @@
+@font-face{
+	font-family:'uniform bold';
+	src:url(../assets/uniform-bold-webfont.woff2) format('woff2'),url(../assets/uniform-bold-webfont.woff) format('woff');
+	font-weight:400;
+	font-style:normal
+}
+
+* {
+    font-family: "Open Sans", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: #666;
+}
+body {
+    margin: 0;
+    padding-top: 50px; /* Adjust this value based on the actual height of your header */
+
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+header {
+    background: #fdfdfd;
+    border-bottom: 1px solid #ececec;
+    padding: 10px;
+    display: block;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: #fff; /* Or whatever background color your header has */
+    z-index: 1000; /* To make sure it stays on top of other content */
+}
+
+
+section {
+    /* padding: 10px; */
+}
+
+header img {
+    width: 30px;
+}
+
+header .nav div {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+header .nav div:hover {
+    background: #d7d7d7;
+}
+
+header .nav div img {
+    height: 15px;
+    width: auto;
+}
+
+body h1, 
+body .h1, 
+body h2, 
+body .h2, 
+body h3, 
+body .h3, 
+body h4, 
+body .h4 {
+    font-family: 'Uniform Bold', 'Open Sans', 'Helvetica', 'Arial', sans-serif;
+    color: #252525;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+body h1, 
+body .h1 {
+    font-size: 2em;
+    line-height: 1em;
+}
+
+body h2, 
+body .h2 {
+    font-size: 2rem;
+    font-weight: 300;
+}
+
+body h3, 
+body .h3 {
+    font-size: 1.5em;
+    line-height: 45px;
+}
+
+body h4, 
+body .h4 {
+    font-size: 1em;
+}
+
+.nav {
+    gap: 10px;
+}
+.stats {
+    /* display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: space-around; */
+}
+
+.stat h3 {
+    border-bottom: 1px solid #ececec !important;
+}
+
+#store {
+    display: flex;
+    align-items: center;
+}
+
+.store-logo {
+    border-radius: 50%;
+}
+
+span.plan {
+    display: block;
+    font-size: 12px;
+    color: #8a8a8a;
+}
+
+/* Container for all rows */
+.orders-container {
+}
+
+/* Individual order row */
+.order-row {
+    display: flex; /* Set to flexbox layout */
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Optional: smooth hover transition */
+}
+
+.order-row:hover {
+    background-color: #f0f0f0; /* Example hover background color */
+}
+
+/* Individual order columns */
+.order-column {
+    overflow: hidden; /* Hide content that overflows the container */
+    text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+    white-space: nowrap; /* Prevent content from wrapping to the next line */
+    padding: 5px; /* Add some padding for better appearance */
+}
+
+.order-column.id {
+    width: 60px; /* Adjust based on your content */
+}
+
+.order-column.created-at {
+    width: 100px; /* Adjust based on your content */
+}
+
+.order-column.total-amount {
+    width: 80px; /* Adjust based on your content */
+}
+
+.order-column.customer {
+    flex-grow: 1; /* Takes remaining available space */
+    max-width: 170px;
+}
+
+.avatar {
+    border-radius: 50%;
+    width: 20px;
+}
+
+/* Additional styling for unread order */
+.order-row.unread-1 .id {
+    border-left: 1px solid #333;
+}
+
+body .btn-primary {
+    background-color: #233642;
+    border-color: #233642;
+    transition: 0.1s linear;
+    -webkit-transition: 0.1s linear;
+    -moz-transition: 0.1s linear;
+}
+
+body .btn-primary:hover {
+    background-color: #233642;
+    border-color: #233642;
+    transform: translate3d(0, -2px, 0);
+    -webkit-transform: translate3d(0, -2px, 0);
+}
+
+.alert {
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.alert.fade-out {
+    opacity: 0;
+}
