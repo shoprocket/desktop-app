@@ -1,12 +1,13 @@
 {
   "name": "Shoprocket",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shoprocket store summary",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "build": "electron-builder"
+    "build": "electron-builder build --mac ",
+    "publish": "electron-builder --mac --win --publish always"
   },
   "author": "Shoprocket Ltd",
   "license": "UNLICENSED",
@@ -15,6 +16,8 @@
     "electron-builder": "^24.6.3"
   },
   "dependencies": {
+    "@sentry/electron": "^4.10.0",
+    "axios": "^1.4.0",
     "chart.js": "^4.3.3",
     "crypto-js": "^4.1.1",
     "electron-store": "^8.1.0",
@@ -22,14 +25,23 @@
     "node-fetch": "^3.3.2"
   },
   "build": {
+    "asar": false,
     "appId": "io.shoprocket.app",
-    "productName": "Shoprocket App",
+    "productName": "Shoprocket",
+    "icon": "assets/icons/windows/icon.ico",
+    "mac": {
+      "icon": "assets/icons/mac/icon.icns",
+      "identity": null
+    },
+    "win": {
+      "icon": "assets/icons/windows/icon.ico"
+    },
     "directories": {
       "output": "build"
     },
     "publish": {
       "provider": "github",
-      "owner": "ryanbadger",
+      "owner": "shoprocket",
       "repo": "desktop-app",
       "releaseType": "release"
     }

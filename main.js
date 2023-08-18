@@ -4,6 +4,19 @@ const store = new Store(); // Initialize store
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 const { dialog } = require('electron');
+const { init, captureMessage, captureException } = require('@sentry/electron');
+const axios = require('axios');
+
+
+
+
+
+init({
+    dsn: "https://da46f9ed305c995d63364f3cc626ae3f@o925826.ingest.sentry.io/4505726470979584",
+});
+
+captureMessage("test");
+
 
 autoUpdater.checkForUpdatesAndNotify();
 
@@ -51,27 +64,33 @@ function createTray() {
     tray = new Tray(icon);
 
     tray.on('click', () => {
-        const trayBounds = tray.getBounds();
-        const yPosition = process.platform === 'darwin' ? trayBounds.y : trayBounds.y + trayBounds.height;
-        const newX = Math.round(trayBounds.x - trayBounds.width / 2);
-        const newY = Math.round(yPosition);
-        const windowBounds = mainWindow.getBounds();
-
-        mainWindow.setBounds({
-            x: newX,
-            y: newY,
-            width: windowBounds.width, // Keep the current width
-            height: windowBounds.height // Keep the current height
-        });
-
-
+        if (process.platform === 'win32') {
+            // For Windows: Position the window in the bottom right-hand corner
+            const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+            mainWindow.setPosition(width - mainWindow.getBounds().width, height - mainWindow.getBounds().height);
+        } else {
+            // For macOS: Position the window directly below the tray icon
+            const trayBounds = tray.getBounds();
+            const newY = process.platform === 'darwin' ? trayBounds.y : trayBounds.y + trayBounds.height;
+            const newX = Math.round(trayBounds.x - trayBounds.width / 2);
+            const windowBounds = mainWindow.getBounds();
     
-        if (mainWindow.isVisible()) { 
+            mainWindow.setBounds({
+                x: newX,
+                y: newY,
+                width: windowBounds.width,
+                height: windowBounds.height
+            });
+        }
+    
+        if (mainWindow.isVisible()) {
             mainWindow.hide();
         } else {
             mainWindow.show();
+            mainWindow.focus();
         }
     });
+    
     
 }
 
@@ -92,6 +111,8 @@ function createWindow() {
     if (process.argv.includes('--dev')) {
         mainWindow.webContents.openDevTools({ mode: 'undocked' });
     }
+
+    mainWindow.webContents.openDevTools({ mode: 'undocked' });
       
 
     mainWindow.loadFile('window.html');
@@ -100,53 +121,54 @@ function createWindow() {
 
 
 const fetchStoreDetails = async (apiKey) => {
-    const storeDetailsUrl = 'https://api.shoprocket.io/v1/store/details';
-    
-    const options = {
-      method: 'GET',
+  const storeDetailsUrl = 'https://api.shoprocket.io/v1/store/details';
+
+  try {
+    const response = await axios.get(storeDetailsUrl, {
       headers: {
         'x-api-key': apiKey // Make sure this matches the correct API key variable
       }
-    };
-  
-    try {
-      const response = await fetch(storeDetailsUrl, options);
-  
-      if (!response.ok) {
-        // Log the response status and body for better diagnostics
-        console.error(`Error fetching store details: ${response.status} - ${response.statusText}`);
-        const text = await response.text();
-        console.error('Response body:', text);
-        return;
-      }
-  
-      const data = await response.json();
-      console.log('Store details:', data);
-      const { store_name, store_logo, store_environment, store_id, default_currency_symbol } = data.data;
-      
-      // save in storage
-      store.set('store', {
-        store_name,
-        store_logo,
-        store_environment,
-        store_id,
-        default_currency_symbol
-      });
+    });
 
-      // send to renderer
-      mainWindow.webContents.send('store-details', {
-        store_name,
-        store_logo,
-        store_environment,
-        store_id,
-        default_currency_symbol
-      });
+    const { data } = response;
+    console.log('Store details:', data);
 
-    } catch (error) {
+    const { store_name, store_logo, store_environment, store_id, default_currency_symbol } = data.data;
+
+    // save in storage
+    store.set('store', {
+      store_name,
+      store_logo,
+      store_environment,
+      store_id,
+      default_currency_symbol
+    });
+
+    // send to renderer
+    mainWindow.webContents.send('store-details', {
+      store_name,
+      store_logo,
+      store_environment,
+      store_id,
+      default_currency_symbol
+    });
+
+  } catch (error) {
+    // Handle Axios-specific error details
+    if (error.response) {
+      console.error(`Error fetching store details: ${error.response.status} - ${error.response.statusText}`);
+      Sentry.withScope(scope => {
+        scope.setExtras({ responseBody: error.response.data });
+        captureException(new Error(`${error.response.status} - ${error.response.statusText}`)); // Send the error to Sentry
+      });
+    } else {
       console.error('Error fetching store details:', error);
-      // Handle the error appropriately
+      captureException(error); // Send the error to Sentry
     }
-  };
+  }
+};
+
+
   
   
 
@@ -194,69 +216,56 @@ ipcMain.handle('get-orders', async (event) => {
 });
 
 
-
 async function fetchOrders() {
     // Check if API key is set
-
     if (!apiKey) {
-        console.error('API key is not set. Please set the API key before fetching orders.');
-        return [];
+      console.error('API key is not set. Please set the API key before fetching orders.');
+      return [];
     }
-
+  
     // Define API URL and headers
     const apiUrl = 'https://api.shoprocket.io/v1/orders?limit=100&page=0';
     const headers = {
-        'x-api-key': apiKey
+      'x-api-key': apiKey
     };
-
+  
     try {
-        // Dynamically import the fetch function from the 'node-fetch' module
-        const fetch = await import('node-fetch');
-
-        // Make the API request
-        const response = await fetch.default(apiUrl, { headers });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch orders. Please check the API key and try again.');
-        }
-        
-        const orders = await response.json();
-        return orders;
+      // Make the API request using Axios
+      const response = await axios.get(apiUrl, { headers });
+  
+      return response.data; // Axios automatically parses the JSON response
     } catch (error) {
-        console.error('Error fetching orders:', error);
-        return [];
+      console.error('Error fetching orders:', error);
+      return [];
     }
-}
+  }
 
 
-
-app.whenReady().then(async () => { // Add 'async' here
+  app.whenReady().then(async () => { // Add 'async' here
     if (process.platform === 'darwin') { // Check if the app is running on macOS
         app.dock.hide(); // Hide the dock icon
     }
     createTray();
     createWindow();
 
-    if (!apiKey || apiKey.trim() === '') {
-        console.log('API key is not set. Showing settings window...');
-        mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.on('did-finish-load', async () => {
+        if (!apiKey || apiKey.trim() === '') {
+            console.log('API key is not set. Showing settings window...');
             mainWindow.webContents.send('show-settings');
-        });
-    } else {
+        } else {
+            // Update the tray title
+            tray.setTitle(`  $145.24`);
 
-        // Update the tray title
-        tray.setTitle(`  $145.24`);
-
-
-        console.log('API key is set. Fetching orders...');
-        fetchStoreDetails(apiKey);
-        const orders = await fetchOrders(); // Fetch orders immediately
-        mainWindow.webContents.send('display-orders', orders);
-
-        // Set an interval to refetch orders every 10 seconds
-        setInterval(async () => {
-            const orders = await fetchOrders();
+            console.log('API key is set. Fetching orders...');
+            fetchStoreDetails(apiKey);
+            const orders = await fetchOrders(); // Fetch orders immediately
             mainWindow.webContents.send('display-orders', orders);
-        }, 10 * 1000);
-    }
+
+            // Set an interval to refetch orders every 10 seconds
+            setInterval(async () => {
+                const orders = await fetchOrders();
+                mainWindow.webContents.send('display-orders', orders);
+            }, 10 * 1000);
+        }
+    });
 });
