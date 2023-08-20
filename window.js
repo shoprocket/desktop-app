@@ -26,12 +26,6 @@ function toggleSection(section) {
     });
 }
 
-ipcRenderer.on('show-settings', () => {
-    console.log("show settings");
-    toggleSection('settings');
-  });
-
-
 function loadApiKey() {
     ipcRenderer.invoke('get-api-key').then(savedApiKey => {
         if (savedApiKey) {
@@ -48,14 +42,6 @@ function listenForDisplayOrders() {
     });
 }
 
-// Listen for the 'store-details' event
-ipcRenderer.on('store-details', (event, data) => {
-    console.log('Received store details:', data);
-    document.querySelector('.store-name .name').innerHTML = data.store_name;
-    document.querySelector('.store-logo').src = "https://img.shoprocket.io/cdn-cgi/image/fit=cover,quality=75,w=70,h=70/" + data.store_logo;
-    // Update other elements as needed
-  });
-
 // Function to create an MD5 hash of a string
 function md5(str) {
     // Use a library like CryptoJS to generate the MD5 hash
@@ -65,26 +51,28 @@ function md5(str) {
 function displayOrders(orders) {
     const orderList = document.getElementById('order-list');
     let content = '';
+    if(orders.data.length > 0) {
+        orders.data.forEach(order => {
+            const createdTimeAgo = timeAgo(order.created_at);
+            const emailHash = md5(order.email);
+            const avatarURL = `https://avatar.shoprocket.io/avatar/${emailHash}?d=identicon&s=128`;
 
-    orders.data.forEach(order => {
-        const createdTimeAgo = timeAgo(order.created_at);
-        const emailHash = md5(order.email);
-        const avatarURL = `https://avatar.shoprocket.io/avatar/${emailHash}?d=identicon&s=128`;
+            content += `
+            <div class="order-row unread-${order.is_unread}" onclick="openOrder('${order.id}')">
+                <span class="order-column id">${order.order_id}</span>
+                <span class="order-column created-at">${createdTimeAgo}</span>
+                <span class="order-column total-amount">${order.currency_paid_in_symbol}${order.total_amount}</span>
+                <span class="order-column customer">
+                    <img class='avatar mr-1' src='${avatarURL}' />
+                    ${order.email}
+                </span>
+            </div>
+            `;
+        });
 
-        content += `
-        <div class="order-row unread-${order.is_unread}" onclick="openOrder('${order.id}')">
-            <span class="order-column id">${order.order_id}</span>
-            <span class="order-column created-at">${createdTimeAgo}</span>
-            <span class="order-column total-amount">${order.currency_paid_in_symbol}${order.total_amount}</span>
-            <span class="order-column customer">
-                <img class='avatar mr-1' src='${avatarURL}' />
-                ${order.email}
-            </span>
-        </div>
-        `;
-    });
+        orderList.innerHTML = content;
+    }
 
-    orderList.innerHTML = content;
 }
 
 
@@ -92,6 +80,51 @@ function openOrder(orderId) {
     const url = `https://shoprocket.io/dashboard/orders/view/${orderId}`;
     shell.openExternal(url);
 }
+
+
+ipcRenderer.on('show-settings', () => {
+    console.log("show settings");
+    toggleSection('settings');
+});
+
+ipcRenderer.on('app-version', (event, version) => {
+    document.querySelector('.version').textContent = "v"+version;
+});
+
+// Listen for the 'store-details' event
+ipcRenderer.on('store-details', (event, data) => {
+    console.log('Received store details:', data);
+    document.querySelector('.store-name .name').innerHTML = data.storeDetails.data.store_name;
+    if(data.storeDetails.data.store_logo) {
+        document.querySelector('.store-logo').src = "https://img.shoprocket.io/cdn-cgi/image/fit=cover,quality=75,w=70,h=70/" + data.storeDetails.data.store_logo;
+    } else {
+        document.querySelector('.store-logo').src = "https://img.shoprocket.io/cdn-cgi/image/fit=cover,quality=75,w=70,h=70/store-placeholder.png";
+    }
+    document.querySelector('.store-name .plan').innerHTML = data.subscription.data.name + " (" + data.subscription.data.status + ")";
+});
+
+
+// Listen for the 'display-stats' event
+ipcRenderer.on('display-stats', (event, data) => {
+    console.log('Received store stats:', data);
+    document.querySelector('.revenue').innerHTML = data.data.stats.revenue;
+    document.querySelector('.orders').innerHTML = data.data.stats.orders;
+    document.querySelector('.visits').innerHTML = data.data.stats.visitors.toLocaleString();
+    document.querySelector('.abandoned').innerHTML = data.data.stats.abandoned;
+});
+
+// Listen for the 'draw-chart' message from the main process
+ipcRenderer.on('draw-chart', (event, sales) => {
+    // Call your drawChart function with the sales data
+    drawChart(sales);
+
+    const loadingElements = document.querySelectorAll('.loading');
+
+    // Loop through the elements and remove the "loading" class
+    loadingElements.forEach((element) => {
+        element.classList.remove('loading');
+    });
+});
 
 // generic external link opener
 document.addEventListener('click', (event) => {
@@ -108,42 +141,26 @@ document.addEventListener('click', (event) => {
   });
 
 
+
 google.charts.load('current', { packages: ['corechart'] });
 google.charts.setOnLoadCallback(drawChart);
 
-function drawChart() {
-  var data = new google.visualization.DataTable();
-  data.addColumn('date', 'Date');
-  data.addColumn('number', 'Revenue');
-  data.addColumn('number', 'Orders');
+function drawChart(sales) {
+    if (!sales) {
+        return;
+    }
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Date');
+    data.addColumn('number', 'Revenue');
+    data.addColumn('number', 'Orders');
 
-  // Example data from API (replace with actual data)
-  var apiData = [
-    { date: '2023-08-01', revenue: 1200, orders: 250 },
-    { date: '2023-08-02', revenue: 1000, orders: 210 },
-    { date: '2023-08-03', revenue: 1500, orders: 300 },
-    { date: '2023-08-04', revenue: 1100, orders: 220 },
-    { date: '2023-08-05', revenue: 1300, orders: 240 },
-    { date: '2023-08-06', revenue: 900,  orders: 200 },
-    { date: '2023-08-07', revenue: 1600, orders: 310 },
-    { date: '2023-08-08', revenue: 1400, orders: 280 },
-    { date: '2023-08-09', revenue: 1000, orders: 210 },
-    { date: '2023-08-10', revenue: 1100, orders: 220 },
-    { date: '2023-08-11', revenue: 1200, orders: 230 },
-    { date: '2023-08-12', revenue: 1300, orders: 250 },
-    { date: '2023-08-13', revenue: 900,  orders: 190 },
-    { date: '2023-08-14', revenue: 1500, orders: 300 },
-    { date: '2023-08-15', revenue: 1400, orders: 290 },
-    { date: '2023-08-16', revenue: 1300, orders: 270 },
-    { date: '2023-08-17', revenue: 1200, orders: 260 },
-    { date: '2023-08-18', revenue: 1100, orders: 240 }      
-  ];
-
-  // Convert the date strings to Date objects and add to the data table
-  apiData.forEach(row => {
-    var [year, month, day] = row.date.split('-').map(Number);
-    data.addRow([new Date(year, month - 1, day), row.revenue, row.orders]);
-  });
+   // Process sales data from API response
+    sales.forEach(sale => {
+        var [year, month, day] = sale.dt.split('-').map(Number);
+        var revenue = parseFloat(sale.total_amount);
+        var orders = parseInt(sale.total_orders, 10);
+        data.addRow([new Date(year, month - 1, day), revenue, orders]);
+    });
 
   // Create a number formatter for currency
   var formatter = new google.visualization.NumberFormat({
@@ -153,42 +170,48 @@ function drawChart() {
   // Apply the formatter to the second column (Daily Revenue)
   formatter.format(data, 1);
 
-  // Set chart options
-  var options = {
-    curveType: 'function',
-    chartArea: {width: '80%'},
-    legend: {position: 'bottom'},
-    tooltip: {
-        // trigger: 'selection',
-        textStyle: {
-            fontSize: 15 // Adjust as needed
+    // Set chart options
+    var options = {
+        curveType: 'function',
+        chartArea: {width: '80%'},
+        legend: {position: 'bottom'},
+        tooltip: {
+            // trigger: 'selection',
+            textStyle: {
+                fontSize: 15 // Adjust as needed
+            }
+        },
+        vAxis: {
+            format: 'short',
+            viewWindow: {min:0},
+            gridlines: {color: '#ececec'}
+        },
+        hAxis: {
+            format: 'd MMM',
+            gridlines: {color: 'none'},
+            textPosition: 'none' // This will hide the hAxis labels
+            // textStyle: {
+            //     fontSize: 0 // Adjust the font size as needed
+            // }
+        },
+        animation:{
+            startup: true,
+            easing: 'out',
+            duration: 2000
         }
-    },
-    vAxis: {
-        format: 'short',
-        viewWindow: {min:0},
-        gridlines: {color: '#ececec'}
-    },
-    hAxis: {
-        format: 'd MMM',
-        gridlines: {color: 'none'}
-    },
-    animation:{
-        startup: true,
-        easing: 'out',
-        duration: 2000
-    }
-};
+    };
 
-  // Instantiate and draw the chart
-  var chart = new google.visualization.LineChart(document.getElementById('linechart'));
-  chart.draw(data, options);
+    // Instantiate and draw the chart
+    var chart = new google.visualization.LineChart(document.getElementById('linechart'));
+    chart.draw(data, options);
 }
 
 
 
+
 function timeAgo(dateString) {
-    const date = new Date(dateString);
+    // Add 'Z' to the dateString to indicate UTC time
+    const date = new Date(dateString + 'Z');
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
   
@@ -203,8 +226,6 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const apiKey = document.getElementById('api-key').value;
     ipcRenderer.invoke('set-api-key', apiKey).then((response) => {
-        console.log("save");
-        console.log(response); // You should see "API Key saved successfully!" in the console
         
         // Display the success message
         var saveMessage = document.getElementById('save-message');

@@ -10,6 +10,9 @@
     font-size: 14px;
     color: #666;
 }
+html, body, main {
+    height: 100%;
+}
 body {
     margin: 0;
     padding-top: 50px; /* Adjust this value based on the actual height of your header */
@@ -38,7 +41,15 @@ header {
 
 
 section {
-    /* padding: 10px; */
+    height: 100%;
+}
+
+#orders-section {
+    display: flex; /* Enable Flexbox */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    flex-direction: column;
+    height: 100%; /* Full height */
 }
 
 header img {
@@ -121,6 +132,7 @@ body .h4 {
 
 .store-logo {
     border-radius: 50%;
+    margin-right: 10px;
 }
 
 span.plan {
@@ -129,9 +141,6 @@ span.plan {
     color: #8a8a8a;
 }
 
-/* Container for all rows */
-.orders-container {
-}
 
 /* Individual order row */
 .order-row {
@@ -149,7 +158,7 @@ span.plan {
     overflow: hidden; /* Hide content that overflows the container */
     text-overflow: ellipsis; /* Add ellipsis for overflowing text */
     white-space: nowrap; /* Prevent content from wrapping to the next line */
-    padding: 5px; /* Add some padding for better appearance */
+    padding: 10px 5px; /* Add some padding for better appearance */
 }
 
 .order-column.id {
@@ -201,4 +210,73 @@ body .btn-primary:hover {
 
 .alert.fade-out {
     opacity: 0;
+}
+
+.no-orders-wrapper {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.no-orders {
+    width: 50%;
+}
+
+
+.version {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 10px;
+}
+
+.loading * {
+    opacity: 0;
+}
+
+.loading:after {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    margin-left: -10px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    -webkit-animation: fa-spin 2s infinite linear;
+    animation: fa-spin 2s infinite linear;
+}
+
+.loading:after {
+    border-color: #333;
+    border-top-color: transparent;
+}
+
+@-webkit-keyframes fa-spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+
+    to {
+        -webkit-transform: rotate(1turn);
+        transform: rotate(1turn)
+    }
+}
+
+@keyframes fa-spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+
+    to {
+        -webkit-transform: rotate(1turn);
+        transform: rotate(1turn)
+    }
 }

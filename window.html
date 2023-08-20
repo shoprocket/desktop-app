@@ -43,35 +43,35 @@
     <main>
 
         <!-- Home -->
-        <section class="p-4" id="home-section">
+        <section class="loading p-4" id="home-section">
             <!-- Good afteroon Ryan -->
 
             <div class="stats row">
                 
                 <div class="stat col-6 pb-4">
                     <h3>Total Revenue</h3>
-                    <h2 id="todays-orders">
+                    <h2 class="revenue">
                         $0.00
                     </h2>
                 </div>
 
                 <div class="stat col-6 pb-4 border-left">
                     <h3>Total Orders</h3>
-                    <h2 id="todays-orders">
+                    <h2 class="orders">
                         0
                     </h2>
                 </div>
 
                 <div class="stat col-6 pb-4">
                     <h3>Total Visitors</h3>
-                    <h2 id="todays-orders">
+                    <h2 class="visits">
                         0
                     </h2>
                 </div>
 
                 <div class="stat col-6 pb-4 border-left">
                     <h3>Abandoned</h3>
-                    <h2 id="todays-orders">
+                    <h2 class="abandoned">
                         $0.00
                     </h2>
                 </div>
@@ -87,7 +87,12 @@
     
         <!-- Orders -->
         <section class="p-4" id="orders-section" style="display: none;">
-            <div id="order-list" class="orders-container"></div>
+            <div id="order-list" class="orders-container">
+                <div class="no-orders-wrapper text-center">
+                    <img class="no-orders" src="https://img.shoprocket.io/cdn-cgi/image/fit=cover,quality=75,w=auto,h=auto/assets/img/illustrations/orders.svg">
+                    <h2 class="mt-3">No orders yet</h2>
+                </div>
+            </div>
         </section>
 
 
@@ -112,6 +117,8 @@
     <div id="save-message" class="alert alert-success" style="display:none;">
         Settings Saved Successfully!
     </div>
+
+    <div class="version"></div>
 
     
 </section>
