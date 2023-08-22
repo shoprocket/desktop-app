@@ -5,6 +5,16 @@
 	font-style:normal
 }
 
+::-webkit-scrollbar {
+    display: none; /* Hide scrollbars */
+  }
+  
+  body {
+    -ms-overflow-style: none; /* Internet Explorer and Edge */
+    scrollbar-width: none; /* Firefox */
+    overflow: scroll; /* Add scrolling */
+  }
+
 * {
     font-family: "Open Sans", Helvetica, Arial, sans-serif;
     font-size: 14px;

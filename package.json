@@ -1,28 +1,29 @@
 {
   "name": "shoprocket",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "Shoprocket store summary",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --dev",
-    "build": "electron-builder build --mac ",
+    "dev": "electron . --dev --options=runtime",
+    "build": "electron-builder build --mac",
     "publish": "electron-builder --mac --win --publish always"
   },
   "author": "Shoprocket Ltd",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@electron/notarize": "^2.1.0",
     "electron": "^26.0.0",
     "electron-builder": "^24.6.3"
   },
   "dependencies": {
     "@sentry/electron": "^4.10.0",
+    "auto-launch": "^5.0.6",
     "axios": "^1.4.0",
     "chart.js": "^4.3.3",
     "crypto-js": "^4.1.1",
     "electron-store": "^8.1.0",
-    "electron-updater": "^6.1.1",
-    "node-fetch": "^3.3.2"
+    "electron-updater": "^6.1.1"
   },
   "build": {
     "appId": "io.shoprocket.app",
@@ -30,7 +31,11 @@
     "icon": "assets/icons/windows/icon.ico",
     "mac": {
       "icon": "assets/icons/mac/icon.icns",
-      "identity": null
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "identity": "AT9QN58429"
     },
     "win": {
       "icon": "assets/icons/windows/icon.ico"

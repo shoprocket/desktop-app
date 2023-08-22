@@ -221,28 +221,51 @@ function timeAgo(dateString) {
     return `${Math.floor(diffInSeconds / 86400)} days ago`;
 }
 
+// Query the saved preferences to set initial checkbox states
+ipcRenderer.invoke('get-notifications-toggle').then(isEnabled => {
+    document.getElementById('notificationsToggle').checked = isEnabled;
+});
+
+ipcRenderer.invoke('get-auto-start-toggle').then(isEnabled => {
+    document.getElementById('autoStartToggle').checked = isEnabled;
+});
 
 document.getElementById('settings-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const apiKey = document.getElementById('api-key').value;
-    ipcRenderer.invoke('set-api-key', apiKey).then((response) => {
-        
-        // Display the success message
-        var saveMessage = document.getElementById('save-message');
-        saveMessage.style.display = 'block';
-        saveMessage.classList.remove('fade-out'); // In case it has the fade-out class from previous fade
+    const notificationsToggle = document.getElementById('notificationsToggle').checked;
+    const autoStartToggle = document.getElementById('autoStartToggle').checked;
 
-        // Trigger the fade-out effect after 3 seconds
-        setTimeout(function() {
-            saveMessage.classList.add('fade-out');
-        }, 3000);
+    // Save the checkbox settings
+    ipcRenderer.invoke('set-notifications-toggle', notificationsToggle);
+    ipcRenderer.invoke('set-auto-start-toggle', autoStartToggle);
 
-        // Hide the success message after the fade-out is completed
-        setTimeout(function() {
-            saveMessage.style.display = 'none';
-            saveMessage.classList.remove('fade-out'); // Reset for next time
-        }, 3500);
-        
+    // Check if the provided API key is different from the stored one
+    ipcRenderer.invoke('get-api-key').then(savedApiKey => {
+        if (apiKey !== savedApiKey) {
+            ipcRenderer.invoke('set-api-key', apiKey).then((response) => {
+                displaySuccessMessage();
+            });
+        } else {
+            displaySuccessMessage();
+        }
     });
-  });
-  
+});
+
+function displaySuccessMessage() {
+    // Display the success message
+    var saveMessage = document.getElementById('save-message');
+    saveMessage.style.display = 'block';
+    saveMessage.classList.remove('fade-out'); // In case it has the fade-out class from previous fade
+
+    // Trigger the fade-out effect after 3 seconds
+    setTimeout(function() {
+        saveMessage.classList.add('fade-out');
+    }, 3000);
+
+    // Hide the success message after the fade-out is completed
+    setTimeout(function() {
+        saveMessage.style.display = 'none';
+        saveMessage.classList.remove('fade-out'); // Reset for next time
+    }, 3500);
+}
