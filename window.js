@@ -53,14 +53,32 @@ function displayOrders(orders) {
     let content = '';
     if(orders.data.length > 0) {
         orders.data.forEach(order => {
-            const createdTimeAgo = timeAgo(order.created_at);
+            const createdDate = new Date(order.created_at + 'Z'); // Append 'Z' to indicate it's UTC
+            const userLocale = navigator.language || navigator.userLanguage; // Get user's preferred language
+
+            // Use the user's locale to format the date in their preferred language and timezone
+            const localFormattedDate = createdDate.toLocaleString(userLocale, {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // Replace the `createdTimeAgo` variable with the `localFormattedDate`
+            const createdTimeLocal = localFormattedDate;
+
+
+
+            // The rest of the code...
+
+
             const emailHash = md5(order.email);
             const avatarURL = `https://avatar.shoprocket.io/avatar/${emailHash}?d=identicon&s=128`;
 
             content += `
             <div class="order-row unread-${order.is_unread}" onclick="openOrder('${order.id}')">
                 <span class="order-column id">${order.order_id}</span>
-                <span class="order-column created-at">${createdTimeAgo}</span>
+                <span class="order-column created-at">${createdTimeLocal}</span>
                 <span class="order-column total-amount">${order.currency_paid_in_symbol}${order.total_amount}</span>
                 <span class="order-column customer">
                     <img class='avatar mr-1' src='${avatarURL}' />
@@ -72,8 +90,8 @@ function displayOrders(orders) {
 
         orderList.innerHTML = content;
     }
-
 }
+
 
 
 function openOrder(orderId) {
