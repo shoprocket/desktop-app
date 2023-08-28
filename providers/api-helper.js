@@ -38,8 +38,6 @@ async function invokeAPI({ method, url, headers, data }) {
           break;
       }
 
-      console.log(response);
-
       return resolve(response.data);
     } catch (error) {
       return reject(error);

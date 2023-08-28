@@ -6,5 +6,8 @@ exports.GLOBAL_VARIABLE = {
 
 exports.MESSAGES = {
   APP_READY: "Shoprocket app started",
+  API_KEY_SAVE_SUCCESS: "API Key saved successfully!",
   METHOD_NOT_ALLOWED: "Method Not Allowed.",
+  ORDER_FAILURE:
+    "An error occurred while fetching orders. Please try again later",
 };

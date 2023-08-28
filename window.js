@@ -1,5 +1,4 @@
 const { ipcRenderer, shell } = require("electron");
-const CryptoJS = require("crypto-js");
 const { timeAgo, md5 } = require("./utils/common-functions");
 const { GLOBAL_VARIABLE } = require("./utils/constants");
 
@@ -112,28 +111,22 @@ ipcRenderer.on("app-version", (event, version) => {
 ipcRenderer.on("store-details", (event, data) => {
   if (data?.storeDetails)
     document.querySelector(".store-name .name").innerHTML =
-      data?.storeDetails?.data?.store_name;
+      data?.storeDetails?.store_name;
 
-  document.querySelector(".store-logo").src = data?.storeDetails?.data
-    ?.store_logo
-    ? `${GLOBAL_VARIABLE.IMG_URL}${data?.storeDetails?.data?.store_logo}`
+  document.querySelector(".store-logo").src = data?.storeDetails?.store_logo
+    ? `${GLOBAL_VARIABLE.IMG_URL}${data?.storeDetails?.store_logo}`
     : `${GLOBAL_VARIABLE.IMG_URL}store-placeholder.png`;
 
   if (data?.subscription)
     document.querySelector(".store-name .plan").innerHTML =
-      data?.subscription?.data?.name +
-      " (" +
-      data?.subscription?.data?.status +
-      ")";
+      data?.subscription?.name + " (" + data?.subscription?.status + ")";
 });
 
 // Listen for the 'display-stats' event
 ipcRenderer.on("display-stats", (event, data) => {
-  document.querySelector(".revenue").innerHTML = data.data.stats.revenue;
-  document.querySelector(".orders").innerHTML = data.data.stats.orders;
-  document.querySelector(".visits").innerHTML =
-    data.data.stats.visitors.toLocaleString();
-  document.querySelector(".abandoned").innerHTML = data.data.stats.abandoned;
+  ["revenue", "orders", "visitors", "abandoned"].forEach((ele) => {
+    document.querySelector(`.${ele}`).innerHTML = data?.data?.stats[ele];
+  });
 });
 
 // Listen for the 'draw-chart' message from the main process

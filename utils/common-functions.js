@@ -1,5 +1,5 @@
 const { MESSAGES } = require("./constants");
-
+const CryptoJS = require("crypto-js");
 const { init, captureMessage, captureException } = require("@sentry/electron");
 
 /**

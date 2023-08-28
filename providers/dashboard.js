@@ -24,7 +24,6 @@ async function fetchStats(from, to) {
       url: `v1/store/stats?from=${from}&to=${to}`,
     });
 
-    console.log(response);
     return response; // Return the entire data object
   } catch (error) {
     captureLog({ method: "error", error }); // Send the error to Sentry if needed

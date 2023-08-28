@@ -13,11 +13,15 @@ const Store = require("electron-store");
 const path = require("path");
 const { autoUpdater } = require("electron-updater");
 const AutoLaunch = require("auto-launch");
+
+// UTILS
 const { GLOBAL_VARIABLE, MESSAGES } = require("./utils/constants");
-const { fetchOrders } = require("./providers/order");
 const { initSentry, captureLog } = require("./utils/common-functions");
-const axios = require("axios");
+
+// SERVICES
+const { fetchOrders } = require("./providers/order");
 const { fetchStats } = require("./providers/dashboard");
+const { fetchStoreDetails, fetchSubscription } = require("./providers/store");
 
 // Constants and Initializations
 const store = new Store();
@@ -110,7 +114,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 450,
     height: 630,
-    show: true,
+    show: false,
     frame: false,
     resizable: true,
     webPreferences: {
@@ -162,47 +166,6 @@ function positionMainWindow() {
   }
 }
 
-// Async function to fetch store details
-async function fetchStoreDetails() {
-  const storeDetailsUrl = "https://api.shoprocket.io/v1/store/details";
-
-  try {
-    const response = await axios.get(storeDetailsUrl, {
-      headers: {
-        "x-api-key": GLOBAL_VARIABLE.API_KEY, // Make sure this matches the correct API key variable
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    // Handle Axios-specific error details
-    if (error.response) {
-      let err = new Error(
-        `${error.response.status} - ${error.response.statusText}`
-      );
-      captureLog({ method: "error", error: err }); // Send the error to Sentry
-    } else {
-      captureLog({ method: "error", error }); // Send the error to Sentry
-    }
-  }
-}
-
-// Define the function to fetch stats
-async function fetchSubscription() {
-  const apiUrl = `https://api.shoprocket.io/v1/subscription`;
-
-  try {
-    const response = await axios.get(apiUrl, {
-      headers: {
-        "x-api-key": GLOBAL_VARIABLE.API_KEY,
-      },
-    });
-
-    return response.data; // Return the entire data object
-  } catch (error) {
-    captureLog({ method: "error", error }); // Send the error to Sentry if needed
-  }
-}
 let previousStats = null;
 let previousFirstOrderId = null;
 
@@ -336,7 +299,7 @@ function handleIpcEvents() {
     GLOBAL_VARIABLE.API_KEY = newApiKey; // Update the apiKey variable
     store.set("apiKey", newApiKey); // Save the new API key to the store
     loadData(); // Reload data after API key is updated
-    return "API Key saved successfully!";
+    return MESSAGES.API_KEY_SAVE_SUCCESS;
   });
 
   // Handlers to return the current settings
@@ -378,10 +341,7 @@ function handleIpcEvents() {
       return orders;
     } catch (error) {
       // Send a specific error message to the renderer process
-      event.sender.send(
-        "get-orders-error",
-        "An error occurred while fetching orders. Please try again later."
-      );
+      event.sender.send("get-orders-error", MESSAGES.ORDER_FAILURE);
       return []; // Return an empty array if there's an error
     }
   });
