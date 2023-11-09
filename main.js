@@ -21,6 +21,11 @@ initSentry();
 // api key
 let apiKey = store.get('apiKey');
 
+
+// Top-level variable to store the store_id once we have it
+let globalStoreId = null;
+
+
 // Load the user's preferences from storage when the app starts
 // If the preferences are not found in the store, they default to true, enabling notifications and auto-launch by default
 let notificationsEnabled = store.get('notificationsEnabled', true);
@@ -46,6 +51,35 @@ function initSentry() {
 }
 
 
+// Generic function to log different types of events to the Shoprocket DB
+async function logEvent(type, description) {
+    if (!globalStoreId) {
+        console.warn('Store ID is not defined. Event not logged.');
+        return; // Exit the function if storeId is not set
+    }
+    
+    const fullDescription = `${description} - App Version: ${version}`; // Append version to the description
+    
+    // URL encode the data
+    const params = new URLSearchParams();
+    params.append('type', type);
+    params.append('description', fullDescription);
+    params.append('user_id', ''); // user_id doesn't exist, so pass an empty string
+    params.append('store_id', globalStoreId);
+
+    // Log the payload to the console for debugging
+    console.log('Logging event with payload:', params.toString());
+    
+    try {
+        const response = await axios.post('https://shoprocket.io/ajax/event', params);
+        console.log(`${type} event logged successfully`, response.data);
+    } catch (error) {
+        console.error(`Error logging ${type} event:`, error.response || error);
+    }
+}
+
+
+
 
 
 
@@ -56,6 +90,7 @@ function setUpAutoUpdater() {
 
     // Set up a periodic check every 5 minutes
     setInterval(() => {
+        logEvent('app event', `Checking for updates.`);
         autoUpdater.checkForUpdates();
     }, 300000); // 300,000 milliseconds = 5 minutes
 
@@ -174,6 +209,9 @@ async function fetchStoreDetails() {
             'x-api-key': apiKey // Make sure this matches the correct API key variable
         }
         });
+
+        // Set the global store_id variable here
+        globalStoreId = response.data.data.store_id;
 
         return response.data;
 
