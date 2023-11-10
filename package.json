@@ -1,6 +1,6 @@
 {
   "name": "shoprocket",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Shoprocket store summary",
   "main": "main.js",
   "scripts": {

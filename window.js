@@ -146,17 +146,17 @@ ipcRenderer.on('draw-chart', (event, sales) => {
 
 // generic external link opener
 document.addEventListener('click', (event) => {
-    const target = event.target;
-    
-    // Check if the clicked element is an anchor tag
-    if (target.tagName === 'A' && target.href) {
-      // Prevent the default browser action
-      event.preventDefault();
-      
-      // Open the link in the default browser
-      shell.openExternal(target.href);
+    // This will find the closest anchor tag if the click was inside an SVG (or any other element within an anchor)
+    const target = event.target.closest('a');
+    // Check if there is an anchor tag
+    if (target && target.href) {
+        // Prevent the default browser action
+        event.preventDefault();
+
+        // Open the link in the default browser
+        shell.openExternal(target.href);
     }
-  });
+});
 
 
 
